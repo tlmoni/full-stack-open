@@ -1,2 +1,3 @@
-# full-stack-open
-Repository for the course Full Stack open 2022
+Repository for the course Full Stack Web Development
+(https://fullstackopen.com/)
+organized by University of Helsinki
