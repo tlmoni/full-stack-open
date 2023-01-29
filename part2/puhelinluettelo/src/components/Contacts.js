@@ -5,7 +5,7 @@ const Contacts = ({ persons, searchFilter }) => {
     <>
       {persons
         .filter(person =>
-          person.name.toLowerCase().indexOf(searchFilter.toLowerCase()) > -1
+          person.name.toLowerCase().startsWith(searchFilter.toLowerCase())
         )
         .map(person =>
         <Contact
