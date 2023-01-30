@@ -1,9 +1,9 @@
-const Contact = ({ name, number }) => {
+const Contact = ({ name, number, deleteContact }) => {
   return (
     <>
-      <p>
-        {name} {number}
-      </p>
+      <form onSubmit={deleteContact}>
+        {name} {number} <button type="submit">delete</button>
+      </form>
     </>
   )
 }

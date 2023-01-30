@@ -1,8 +1,7 @@
 const Filter = ({ searchFilter, updateSearchFilter }) => {
   return (
     <>
-      filter shown with
-      <input
+      filter shown with <input
         value={searchFilter}
         onChange={updateSearchFilter} />
     </>
