@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react'
 
-import personService from './services/persons'
-import Filter from './components/Filter'
-import ContactForm from './components/ContactForm'
 import Contact from './components/Contact'
+import ContactForm from './components/ContactForm'
+import Filter from './components/Filter'
+import Notification from './components/Notification'
+import personService from './services/persons'
 
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState("")
   const [newNumber, setNewNumber] = useState("")
   const [searchFilter, setSearchFilter] = useState("")
+  const [notification, setNotification] = useState(null)
 
   useEffect(() => {
     personService
@@ -48,6 +50,20 @@ const App = () => {
             )
             setNewName("")
             setNewNumber("")
+            setNotification(
+              `${personObject.name}'s number updated successfully`
+            )
+            setTimeout(() => {
+              setNotification(null)
+            }, 5000)
+          })
+          .catch(error => {
+            setNotification(
+              `Information of ${personObject.name} has already been removed from the server`
+            )
+            setTimeout(() => {
+              setNotification(null)
+            }, 5000)
           })
       }
     }
@@ -59,23 +75,37 @@ const App = () => {
           setPersons(persons.concat(returnedObject))
           setNewName("")
           setNewNumber("")
+          setNotification(
+            `${personObject.name} added successfully`
+          )
+          setTimeout(() => {
+            setNotification(null)
+          }, 5000)
         })
     }
   }
 
   const deletePerson = (id) => {
+    const name = (persons.find(person => person.id === id)).name
     if (
       window.confirm(
-        `Delete ${(persons.find(person => person.id === id)).name}?`
+        `Delete ${name}?`
       )
     ) {
       personService.deleteContact(id)
+      setNotification(
+        `${name} deleted successfully`
+      )
+      setTimeout(() => {
+        setNotification(null)
+      }, 5000)
     }
   }
 
   return (
     <div>
       <h1>Phonebook</h1>
+      <Notification message={notification}/>
       <Filter
         searchFilter={searchFilter}
         updateSearchFilter={updateSearchFilter}
