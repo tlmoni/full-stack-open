@@ -58,9 +58,14 @@ const App = () => {
             }, 5000)
           })
           .catch(error => {
-            setNotification(
-              `Information of ${personObject.name} has already been removed from the server`
-            )
+            if (error.response.data.error.indexOf("valid") > -1) {
+              setNotification(error.response.data.error)
+            }
+            else {
+              setNotification(
+                `Information of ${personObject.name} has already been removed from the server`
+              )
+            }
             setTimeout(() => {
               setNotification(null)
             }, 5000)
@@ -81,6 +86,10 @@ const App = () => {
           setTimeout(() => {
             setNotification(null)
           }, 5000)
+        })
+        .catch(error => {
+          setNotification(error.response.data.error)
+          console.log(error.response.data)
         })
     }
   }

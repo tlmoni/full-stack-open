@@ -12,7 +12,8 @@ const Notification = ({ message }) => {
   if (message === null) {
     return null
   }
-  if (message.indexOf("removed") > -1) {
+  if (
+    message.indexOf("removed") > -1 || message.indexOf("valid") > -1) {
     notificationStyle.color = "red"
   }
   return (
