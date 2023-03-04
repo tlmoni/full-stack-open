@@ -16,7 +16,7 @@ describe("Initially one user in database", () => {
     await user.save()
   })
 
-  test("creation succeeds with a fresh username", async () => {
+  test("Creation succeeds with a fresh username", async () => {
     const usersAtStart = await helper.usersInDb()
 
     const newUser = {
@@ -38,7 +38,7 @@ describe("Initially one user in database", () => {
     expect(usernames).toContain(newUser.username)
   })
 
-  test("creation fails with proper statuscode and message if username already taken", async () => {
+  test("Creation fails with proper statuscode and message if username already taken", async () => {
     const usersAtStart = await helper.usersInDb()
 
     const newUser = {
@@ -53,13 +53,13 @@ describe("Initially one user in database", () => {
       .expect(400)
       .expect("Content-Type", /application\/json/)
 
-    expect(result.body.error).toContain("Expected `username` to be unique")
+    expect(result.body.error).toContain("expected `username` to be unique")
 
     const usersAtEnd = await helper.usersInDb()
     expect(usersAtEnd).toHaveLength(usersAtStart.length)
   })
-})
 
-afterAll(async () => {
-  await mongoose.connection.close()
+  afterAll(async () => {
+    await mongoose.connection.close()
+  })
 })
