@@ -160,7 +160,6 @@ describe("PUT requests to Blogs API", () => {
   })
 })
 
-
 afterAll(async () => {
   await mongoose.connection.close()
 })
