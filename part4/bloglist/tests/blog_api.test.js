@@ -20,7 +20,7 @@ describe("GET requests to Blogs API", () => {
       .expect("Content-Type", /application\/json/)
   })
 
-  test("There are two blogs after GET request with test data", async () => {
+  test("All blogs are returned by GET request with test data", async () => {
     const response = await api.get("/api/blogs")
     expect(response.body).toHaveLength(helper.initialBlogs.length)
   })
@@ -38,7 +38,7 @@ describe("GET requests to Blogs API", () => {
 
 // POST request related tests
 describe("POST requests to Blogs API", () => {
-  test("A blog an be posted successfully", async () => {
+  test("A blog can be posted successfully", async () => {
     const newBlog = {
       title: "Canonical string reduction",
       author: "Edsger W. Dijkstra",
@@ -52,10 +52,10 @@ describe("POST requests to Blogs API", () => {
       .expect(201)
       .expect("Content-Type", /application\/json/)
 
-    const blogsAfterPost = await helper.blogsInDb()
-    const titles = blogsAfterPost.map(blog => blog.title)
+    const blogs = await helper.blogsInDb()
+    const titles = blogs.map(blog => blog.title)
 
-    expect(blogsAfterPost).toHaveLength(helper.initialBlogs.length + 1)
+    expect(blogs).toHaveLength(helper.initialBlogs.length + 1)
     expect(titles).toContain("Canonical string reduction")
   })
 
@@ -72,8 +72,8 @@ describe("POST requests to Blogs API", () => {
       .expect(201)
       .expect("Content-Type", /application\/json/)
 
-    const blogsAfterPost = await helper.blogsInDb()
-    const addedBlog = await blogsAfterPost.find(blog => blog.title === "First class tests")
+    const blogs = await helper.blogsInDb()
+    const addedBlog = await blogs.find(blog => blog.title === "First class tests")
     expect(addedBlog.likes).toBe(0)
   })
 
@@ -88,10 +88,78 @@ describe("POST requests to Blogs API", () => {
       .send(newBlog)
       .expect(400)
 
-    const blogsAfterPost = await helper.blogsInDb()
-    expect(blogsAfterPost).toHaveLength(helper.initialBlogs.length)
+    const blogs = await helper.blogsInDb()
+    expect(blogs).toHaveLength(helper.initialBlogs.length)
   })
 })
+
+// DELETE request related tests
+describe("DELETE requests to Blogs API", () => {
+  test("A blog can be deleted successfully", async () => {
+    const newBlog = {
+      title: "Canonical string reduction",
+      author: "Edsger W. Dijkstra",
+      url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
+      likes: 12
+    }
+
+    await api
+      .post("/api/blogs")
+      .send(newBlog)
+      .expect(201)
+      .expect("Content-Type", /application\/json/)
+
+    let blogs = await helper.blogsInDb()
+    const blogToDelete = blogs.find(blog => blog.title === newBlog.title)
+
+    await api
+      .delete(`/api/blogs/${blogToDelete.id}`)
+      .expect(204)
+
+    blogs = await helper.blogsInDb()
+    const titles = blogs.map(blog => blog.title)
+
+    expect(blogs).toHaveLength(helper.initialBlogs.length)
+    expect(titles).not.toContain(blogToDelete.title)
+  })
+})
+
+// PUT request related tests
+describe("PUT requests to Blogs API", () => {
+  test("A blog can be updated successfully", async () => {
+    const newBlog = {
+      title: "Canonical string reduction",
+      author: "Edsger W. Dijkstra",
+      url: "http://www.cs.utexas.edu/~EWD/transcriptions/EWD08xx/EWD808.html",
+      likes: 12
+    }
+
+    await api
+      .post("/api/blogs")
+      .send(newBlog)
+      .expect(201)
+      .expect("Content-Type", /application\/json/)
+
+    let blogs = await helper.blogsInDb()
+    const blogToUpdate = blogs.find(blog => blog.title === newBlog.title)
+    let updatedBlog = {
+      ...blogToUpdate,
+      likes: blogToUpdate.likes + 1
+    }
+
+    await api
+      .put(`/api/blogs/${updatedBlog.id}`)
+      .send(updatedBlog)
+      .expect(200)
+      .expect("Content-Type", /application\/json/)
+
+    blogs = await helper.blogsInDb()
+    updatedBlog = blogs.find(blog => blog.likes === 13)
+    expect(blogs).toHaveLength(helper.initialBlogs.length + 1)
+    expect(updatedBlog.likes).toBe(13)
+  })
+})
+
 
 afterAll(async () => {
   await mongoose.connection.close()
