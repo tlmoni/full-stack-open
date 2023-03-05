@@ -1,15 +1,7 @@
-const jwt = require("jsonwebtoken")
 const blogsRouter = require("express").Router()
 const Blog = require("../models/blog")
 const User = require("../models/user")
-
-const getTokenFrom = request => {
-  const authorization = request.get("authorization")
-  if (authorization && authorization.startsWith("Bearer ")) {
-    return authorization.replace("Bearer ", "")
-  }
-  return null
-}
+const { userExtractor } = require("../utils/middleware")
 
 blogsRouter.get("/", async (request, response) => {
   const blogs = await Blog
@@ -18,19 +10,15 @@ blogsRouter.get("/", async (request, response) => {
   response.json(blogs)
 })
 
-blogsRouter.post("/", async (request, response) => {
+blogsRouter.post("/", userExtractor, async (request, response) => {
   const { title, author, url, likes } = request.body
-  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET)
-  if (!decodedToken.id) {
-    return response.status(401).json({ error: "Invalid token" })
-  }
-  const user = await User.findById(decodedToken.id)
+  const user = await User.findById(request.user.id)
   const blog = new Blog({
     title: title,
     author: author,
     url: url,
     likes: likes,
-    user: user._id
+    user: user.id
   })
 
   const savedBlog = await blog.save()
@@ -40,20 +28,26 @@ blogsRouter.post("/", async (request, response) => {
   response.status(201).json(savedBlog)
 })
 
-blogsRouter.delete("/:id", async (request, response) => {
-  await Blog.findByIdAndRemove(request.params.id)
-  response.status(204).end()
+blogsRouter.delete("/:id", userExtractor, async (request, response) => {
+  const user = await User.findById(request.user.id)
+  const blogToDelete = await Blog.findById(request.params.id)
+
+  if (blogToDelete.user.toString() === user.id.toString()) {
+    await Blog.findByIdAndRemove(request.params.id)
+    response.status(204).end()
+  }
+  else {
+    return response.status(401).json({ error: "Unauthorized" })
+  }
 })
 
-blogsRouter.put("/:id", async (request, response) => {
+blogsRouter.put("/:id", userExtractor, async (request, response) => {
   const { title, author, url, likes } = request.body
-  const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET)
-  if (!decodedToken.id) {
-    return response.status(401).json({ error: "Invalid token" })
-  }
-  const user = await User.findById(decodedToken.id)
+
+  const user = request.user
   const blogToUpdate = await Blog.findById(request.params.id)
-  if (blogToUpdate.user.toString() === user._id.toString()) {
+
+  if (blogToUpdate.user.toString() === user.id.toString()) {
     const blog = {
       title: title,
       author: author,

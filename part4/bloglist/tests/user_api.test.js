@@ -6,7 +6,7 @@ const api = supertest(app)
 const bcrypt = require("bcrypt")
 const User = require("../models/user")
 
-describe("Initially one user in database", () => {
+describe("User tests (initially one user in database)", () => {
   beforeEach(async () => {
     await User.deleteMany({})
 
@@ -43,7 +43,7 @@ describe("Initially one user in database", () => {
 
     const newUser = {
       username: "root",
-      name: "Superuser",
+      name: "root",
       password: "salainen",
     }
 
@@ -54,6 +54,48 @@ describe("Initially one user in database", () => {
       .expect("Content-Type", /application\/json/)
 
     expect(result.body.error).toContain("expected `username` to be unique")
+
+    const usersAtEnd = await helper.usersInDb()
+    expect(usersAtEnd).toHaveLength(usersAtStart.length)
+  })
+
+  test("Creation fails with proper statuscode and message if username too short", async () => {
+    const usersAtStart = await helper.usersInDb()
+
+    const newUser = {
+      username: "ro",
+      name: "root",
+      password: "salainen",
+    }
+
+    const result = await api
+      .post("/api/users")
+      .send(newUser)
+      .expect(400)
+      .expect("Content-Type", /application\/json/)
+
+    expect(result.body.error).toContain("is shorter than minimum allowed length (3)")
+
+    const usersAtEnd = await helper.usersInDb()
+    expect(usersAtEnd).toHaveLength(usersAtStart.length)
+  })
+
+  test("Creation fails with proper statuscode and message if password too short", async () => {
+    const usersAtStart = await helper.usersInDb()
+
+    const newUser = {
+      username: "test-user",
+      name: "test-user",
+      password: "sa",
+    }
+
+    const result = await api
+      .post("/api/users")
+      .send(newUser)
+      .expect(400)
+      .expect("Content-Type", /application\/json/)
+
+    expect(result.body.error).toContain("is shorter than minimum allowed length (3)")
 
     const usersAtEnd = await helper.usersInDb()
     expect(usersAtEnd).toHaveLength(usersAtStart.length)

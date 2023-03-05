@@ -5,17 +5,42 @@ const app = require("../app")
 const api = supertest(app)
 
 const Blog = require("../models/blog")
+const User = require("../models/user")
 
 beforeEach(async () => {
+  await User.deleteMany({})
   await Blog.deleteMany({})
   await Blog.insertMany(helper.initialBlogs)
 })
 
 // GET request related tests
 describe("GET requests to Blogs API", () => {
+  let headers
+
+  beforeEach(async () => {
+    const user = {
+      username: "root",
+      name: "root",
+      password: "password",
+    }
+
+    await api
+      .post("/api/users")
+      .send(user)
+
+    const result = await api
+      .post("/api/login")
+      .send(user)
+
+    headers = {
+      "Authorization": `Bearer ${result.body.token}`
+    }
+  })
+
   test("Blogs are returned as JSON", async () => {
     await api
       .get("/api/blogs")
+      .set(headers)
       .expect(200)
       .expect("Content-Type", /application\/json/)
   })
@@ -38,6 +63,28 @@ describe("GET requests to Blogs API", () => {
 
 // POST request related tests
 describe("POST requests to Blogs API", () => {
+  let headers
+
+  beforeEach(async () => {
+    const user = {
+      username: "root",
+      name: "root",
+      password: "password",
+    }
+
+    await api
+      .post("/api/users")
+      .send(user)
+
+    const result = await api
+      .post("/api/login")
+      .send(user)
+
+    headers = {
+      "Authorization": `Bearer ${result.body.token}`
+    }
+  })
+
   test("A blog can be posted successfully", async () => {
     const newBlog = {
       title: "Canonical string reduction",
@@ -49,6 +96,7 @@ describe("POST requests to Blogs API", () => {
     await api
       .post("/api/blogs")
       .send(newBlog)
+      .set(headers)
       .expect(201)
       .expect("Content-Type", /application\/json/)
 
@@ -69,6 +117,7 @@ describe("POST requests to Blogs API", () => {
     await api
       .post("/api/blogs")
       .send(newBlog)
+      .set(headers)
       .expect(201)
       .expect("Content-Type", /application\/json/)
 
@@ -86,6 +135,7 @@ describe("POST requests to Blogs API", () => {
     await api
       .post("/api/blogs")
       .send(newBlog)
+      .set(headers)
       .expect(400)
 
     const blogs = await helper.blogsInDb()
@@ -95,6 +145,28 @@ describe("POST requests to Blogs API", () => {
 
 // DELETE request related tests
 describe("DELETE requests to Blogs API", () => {
+  let headers
+
+  beforeEach(async () => {
+    const user = {
+      username: "root",
+      name: "root",
+      password: "password",
+    }
+
+    await api
+      .post("/api/users")
+      .send(user)
+
+    const result = await api
+      .post("/api/login")
+      .send(user)
+
+    headers = {
+      "Authorization": `Bearer ${result.body.token}`
+    }
+  })
+
   test("A blog can be deleted successfully", async () => {
     const newBlog = {
       title: "Canonical string reduction",
@@ -106,6 +178,7 @@ describe("DELETE requests to Blogs API", () => {
     await api
       .post("/api/blogs")
       .send(newBlog)
+      .set(headers)
       .expect(201)
       .expect("Content-Type", /application\/json/)
 
@@ -114,6 +187,7 @@ describe("DELETE requests to Blogs API", () => {
 
     await api
       .delete(`/api/blogs/${blogToDelete.id}`)
+      .set(headers)
       .expect(204)
 
     blogs = await helper.blogsInDb()
@@ -126,6 +200,28 @@ describe("DELETE requests to Blogs API", () => {
 
 // PUT request related tests
 describe("PUT requests to Blogs API", () => {
+  let headers
+
+  beforeEach(async () => {
+    const user = {
+      username: "root",
+      name: "root",
+      password: "password",
+    }
+
+    await api
+      .post("/api/users")
+      .send(user)
+
+    const result = await api
+      .post("/api/login")
+      .send(user)
+
+    headers = {
+      "Authorization": `Bearer ${result.body.token}`
+    }
+  })
+
   test("A blog can be updated successfully", async () => {
     const newBlog = {
       title: "Canonical string reduction",
@@ -137,6 +233,7 @@ describe("PUT requests to Blogs API", () => {
     await api
       .post("/api/blogs")
       .send(newBlog)
+      .set(headers)
       .expect(201)
       .expect("Content-Type", /application\/json/)
 
@@ -150,6 +247,7 @@ describe("PUT requests to Blogs API", () => {
     await api
       .put(`/api/blogs/${updatedBlog.id}`)
       .send(updatedBlog)
+      .set(headers)
       .expect(200)
       .expect("Content-Type", /application\/json/)
 
