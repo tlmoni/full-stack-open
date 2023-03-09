@@ -1,9 +1,9 @@
 module.exports = {
   "env": {
     "browser": true,
-    "commonjs": true,
-    "es2021": true,
-    "node": true
+    "es6": true,
+    "jest/globals": true,
+    "cypress/globals": true
   },
   "extends": [
     "eslint:recommended",
@@ -13,18 +13,14 @@ module.exports = {
     "ecmaFeatures": {
       "jsx": true
     },
-    "ecmaVersion": "latest",
+    "ecmaVersion": "2018",
     "sourceType": "module"
   },
   "plugins": [
     "react",
-    "jest"
+    "jest",
+    "cypress"
   ],
-  "settings": {
-    "react": {
-      "version": "detect"
-    }
-  },
   "rules": {
     "indent": [
       "error",
@@ -54,5 +50,10 @@ module.exports = {
     "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
     "no-console": 0,
     "react/prop-types": 0,
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
   }
 }

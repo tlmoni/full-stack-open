@@ -1,9 +1,12 @@
 const mongoose = require("mongoose")
+const uniqueValidator = require("mongoose-unique-validator")
 
 const blogSchema = mongoose.Schema({
   title: {
     type: String,
     required: true,
+    minLength: 1,
+    unique: true
   },
   author: String,
   url: {
@@ -28,4 +31,5 @@ blogSchema.set("toJSON", {
   }
 })
 
+blogSchema.plugin(uniqueValidator)
 module.exports = mongoose.model("Blog", blogSchema)

@@ -9,7 +9,7 @@ import Togglable from "./components/Togglable"
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
-  const [notification, setNotification] = useState(null)
+  const [notification, setNotification] = useState("")
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [user, setUser] = useState(null)
@@ -17,7 +17,9 @@ const App = () => {
   useEffect(() => {
     blogService
       .getAll()
-      .then(blogs => setBlogs(blogs))
+      .then(blogs => {
+        setBlogs(blogs)
+      })
   }, [blogs])
 
   useEffect(() => {
@@ -28,6 +30,8 @@ const App = () => {
       blogService.setToken(user.token)
     }
   }, [])
+
+  const blogFormRef = useRef()
 
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -43,7 +47,7 @@ const App = () => {
       console.log(exception)
       setNotification("Wrong username or password")
       setTimeout(() => {
-        setNotification(null)
+        setNotification("")
       }, 5000)
     }
   }
@@ -57,13 +61,12 @@ const App = () => {
     catch (exception) {
       setNotification(exception)
       setTimeout(() => {
-        setNotification(null)
+        setNotification("")
       }, 5000)
     }
   }
 
   const addBlog = async (blogObject) => {
-    blogFormRef.current.toggleVisibility()
     try {
       const returnedBlog = await blogService.post(blogObject)
       setBlogs(blogs.concat(returnedBlog))
@@ -71,13 +74,15 @@ const App = () => {
         `A new blog ${returnedBlog.title} by ${returnedBlog.author} added`
       )
       setTimeout(() => {
-        setNotification(null)
+        setNotification("")
       }, 5000)
+      blogFormRef.current.toggleVisibility()
     }
     catch(exception) {
+      setBlogs(blogService.getAll())
       setNotification(exception)
       setTimeout(() => {
-        setNotification(null)
+        setNotification("")
       }, 5000)
     }
   }
@@ -85,15 +90,16 @@ const App = () => {
   const updateBlog = async (blogObject) => {
     try {
       const returnedBlog = await blogService.update(blogObject.id, blogObject)
+      console.log(returnedBlog)
       setBlogs(blogs.map(blog => blog.id !== returnedBlog.id ? blog : returnedBlog))
       setTimeout(() => {
-        setNotification(null)
+        setNotification("")
       }, 5000)
     }
     catch(exception) {
       setNotification("Blog was already removed from server")
       setTimeout(() => {
-        setNotification(null)
+        setNotification("")
       }, 5000)
       setBlogs(blogs.filter(blog => blog.id !== blogObject.id))
     }
@@ -106,19 +112,17 @@ const App = () => {
         setBlogs(blogs.filter(blog => blog.id !== blogObject.id))
         setNotification("Blog removed successfully")
         setTimeout(() => {
-          setNotification(null)
+          setNotification("")
         }, 5000)
       }
     }
     catch(exception) {
       setNotification(exception)
       setTimeout(() => {
-        setNotification(null)
+        setNotification("")
       }, 5000)
     }
   }
-
-  const blogFormRef = useRef()
 
   return (
     <div>
@@ -139,7 +143,7 @@ const App = () => {
       {user &&
         <div>
           <p>
-            Logged in as {user.name} <button type="submit" onClick={handleLogout}>
+            Logged in as {user.name} <button id="logout" type="submit" onClick={handleLogout}>
               Logout
             </button>
           </p>
