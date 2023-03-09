@@ -20,7 +20,7 @@ const App = () => {
       .then(blogs => {
         setBlogs(blogs)
       })
-  }, [blogs])
+  }, [])
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem("loggedUser")
@@ -90,11 +90,7 @@ const App = () => {
   const updateBlog = async (blogObject) => {
     try {
       const returnedBlog = await blogService.update(blogObject.id, blogObject)
-      console.log(returnedBlog)
       setBlogs(blogs.map(blog => blog.id !== returnedBlog.id ? blog : returnedBlog))
-      setTimeout(() => {
-        setNotification("")
-      }, 5000)
     }
     catch(exception) {
       setNotification("Blog was already removed from server")
