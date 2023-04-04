@@ -1,4 +1,5 @@
 import { useDispatch } from "react-redux"
+import { TextField, Button, Typography } from "@mui/material"
 import { useField } from "../hooks"
 import { createBlog } from "../reducers/blogReducer"
 
@@ -26,21 +27,28 @@ const BlogForm = () => {
 
   return (
     <div>
-      <h2>Add new blog</h2>
+      <Typography variant="h4" component="h2">
+        Add new blog
+      </Typography>
       <form onSubmit={add}>
         <div>
-          Title: <input id="title" {...title} />
+          <TextField id="title" label="Title" {...title} />
         </div>
         <div>
-          Author: <input id="author" {...author} />
+          <TextField id="author" label="Author" {...author} />
         </div>
         <div>
-          URL: <input id="url" {...url} />
+          <TextField id="url" label="URL" {...url} />
         </div>
         <div>
-          <button id="add-blog" type="submit">
+          <Button
+            id="add-blog"
+            variant="contained"
+            color="primary"
+            type="submit"
+          >
             Add
-          </button>
+          </Button>
         </div>
       </form>
     </div>

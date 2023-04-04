@@ -82,4 +82,19 @@ export const remove = (blog) => {
   }
 }
 
+export const commentBlog = (blog, comment) => {
+  return async (dispatch) => {
+    try {
+      const commentedBlog = await blogService.comment(blog.id, {
+        comment: comment
+      })
+      dispatch(updateBlog(commentedBlog))
+    } catch (exception) {
+      console.log(exception)
+      dispatch(setNotification("Blog was already removed from server", 5))
+      dispatch(removeBlog(blog.id))
+    }
+  }
+}
+
 export default blogSlice.reducer

@@ -1,6 +1,7 @@
 import { useDispatch } from "react-redux"
+import { TextField, Button } from "@mui/material"
 import { useField } from "../hooks"
-import { login } from "../reducers/userReducer"
+import { login } from "../reducers/authReducer"
 
 const LoginForm = () => {
   const { reset: resetUsername, ...username } = useField("text")
@@ -20,14 +21,19 @@ const LoginForm = () => {
       <h2>Log in to application</h2>
       <form onSubmit={submitLogin}>
         <div>
-          Username: <input id="username" {...username} />
+          <TextField id="username" label="Username" {...username} />
         </div>
         <div>
-          Password: <input id="password" {...password} />
+          <TextField id="password" label="Password" {...password} />
         </div>
-        <button id="login-button" type="submit">
+        <Button
+          id="login-button"
+          variant="contained"
+          color="primary"
+          type="submit"
+        >
           Login
-        </button>
+        </Button>
       </form>
     </div>
   )

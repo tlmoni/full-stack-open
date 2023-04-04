@@ -1,72 +1,91 @@
-import { useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
-import PropTypes from "prop-types"
-
-import { like, remove } from "../reducers/blogReducer"
+import { Link, useNavigate } from "react-router-dom"
+import { Button, List, ListItem, TextField, Typography } from "@mui/material"
+import CommentIcon from "@mui/icons-material/Comment"
+import { like, remove, commentBlog } from "../reducers/blogReducer"
+import { useField } from "../hooks"
 
 const Blog = ({ blog }) => {
   const user = useSelector(({ user }) => user)
+  const { reset: resetComment, ...comment } = useField("text")
 
   const dispatch = useDispatch()
+  const navigate = useNavigate()
 
-  const [visible, setVisible] = useState(false)
-  const showIfVisible = { display: visible ? "" : "none" }
-  const buttonLabel = visible ? "Hide" : "View"
-
-  const blogStyle = {
-    paddingTop: 5,
-    paddingBottom: 5,
-    paddingLeft: 10,
-    border: "solid",
-    borderWidth: 1,
-    borderRadius: 5,
-    marginBottom: 5
+  const addComment = (event) => {
+    event.preventDefault()
+    dispatch(commentBlog(blog, comment.value))
+    resetComment()
   }
 
-  const buttonStyle = {
-    backgroundColor: "darkgrey",
-    borderRadius: 3
-  }
-
-  const toggleVisibility = () => {
-    setVisible(!visible)
-  }
-
-  const incrementLikes = () => {
-    dispatch(like(blog))
-  }
-
-  const removeBlog = () => {
-    dispatch(remove(blog))
+  if (!blog) {
+    return null
   }
 
   return (
-    <div className="blog" style={blogStyle}>
+    <div className="blog">
+      <Typography
+        variant="h4"
+        component="h1"
+        style={{ paddingTop: 10, paddingBottom: 10 }}
+      >
+        {blog.title} by {blog.author}
+      </Typography>
       <div>
-        {blog.title} {blog.author}{" "}
-        <button onClick={toggleVisibility}>{buttonLabel}</button>
-      </div>
-      <div style={showIfVisible}>
-        <a href={blog.url}>{blog.url}</a>
-        <p>
+        <Typography component={Link} to={blog.url}>
+          {blog.url}
+        </Typography>
+        <Typography component="p" style={{ paddingTop: 10, paddingBottom: 10 }}>
           {blog.likes} likes{" "}
-          <button id="like-button" onClick={incrementLikes}>
+          <Button
+            id="like-button"
+            variant="contained"
+            onClick={() => dispatch(like(blog))}
+          >
             Like
-          </button>
-        </p>
-        <p>{blog.user.name}</p>
+          </Button>
+        </Typography>
+        <Typography component="p" style={{ paddingTop: 10, paddingBottom: 10 }}>
+          Added by {blog.user.name}
+        </Typography>
         {user && user.name === blog.user.name ? (
-          <button id="remove" onClick={removeBlog} style={buttonStyle}>
+          <Button
+            id="remove"
+            variant="outlined"
+            color="error"
+            onClick={() => {
+              dispatch(remove(blog))
+              navigate("/")
+            }}
+          >
             Remove
-          </button>
+          </Button>
         ) : null}
       </div>
+      <Typography
+        variant="h4"
+        component="h3"
+        style={{ paddingTop: 30, paddingBottom: 10 }}
+      >
+        Comments
+      </Typography>
+      <form onSubmit={addComment}>
+        <TextField id="comment" label="Comment" {...comment} />
+        <br />
+        <Button id="add-comment" variant="contained" type="submit">
+          Add comment
+        </Button>
+      </form>
+      <List>
+        {blog.comments.map((comment, i) => (
+          <ListItem key={i + 1}>
+            <CommentIcon sx={{ paddingRight: 3 }} />
+            {comment}
+          </ListItem>
+        ))}
+      </List>
     </div>
   )
-}
-
-Blog.propTypes = {
-  blog: PropTypes.object.isRequired
 }
 
 export default Blog
