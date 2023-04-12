@@ -6,8 +6,7 @@ import { EDIT_BIRTH_YEAR, ALL_AUTHORS } from "../queries"
 const EditBirthYear = ({ allAuthors, setError }) => {
   const [nameOptions, setNameOptions] = useState(null)
   const [setBornTo, setBornYear] = useState("")
-
-  const [ changeBornYear, result ] = useMutation(EDIT_BIRTH_YEAR, {
+  const [editBornYear, result] = useMutation(EDIT_BIRTH_YEAR, {
     refetchQueries: [
       { query: ALL_AUTHORS }
     ]
@@ -23,10 +22,9 @@ const EditBirthYear = ({ allAuthors, setError }) => {
 
   const submit = (event) => {
     event.preventDefault()
-
-    const name = nameOptions.value
-
-    changeBornYear({ variables: { name, setBornTo } })
+    editBornYear({ variables:
+      { name: nameOptions.value, setBornTo: Number(setBornTo) }
+    })
     setNameOptions("")
     setBornYear("")
   }

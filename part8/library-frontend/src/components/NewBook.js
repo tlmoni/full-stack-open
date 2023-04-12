@@ -1,15 +1,19 @@
 import { useState } from "react"
 import { useMutation } from "@apollo/client"
-import { ALL_AUTHORS, ALL_BOOKS, CREATE_BOOK } from "../queries"
+import {
+  ALL_AUTHORS,
+  ALL_BOOKS,
+  ADD_BOOK
+} from "../queries"
 
-const NewBook = ({ show, setError }) => {
+const NewBook = ({ show, setError, setPage }) => {
   const [title, setTitle] = useState("")
   const [author, setAuthor] = useState("")
   const [published, setPublished] = useState("")
   const [genre, setGenre] = useState("")
   const [genres, setGenres] = useState([])
 
-  const [ createBook ] = useMutation(CREATE_BOOK, {
+  const [createBook] = useMutation(ADD_BOOK, {
     refetchQueries: [
       { query: ALL_BOOKS },
       { query: ALL_AUTHORS }
@@ -19,25 +23,29 @@ const NewBook = ({ show, setError }) => {
     }
   })
 
-  if (!show) {
-    return null
-  }
-
   const submit = async (event) => {
     event.preventDefault()
-
-    createBook({  variables: { title, author, published, genres } })
-
-    setTitle("")
-    setPublished("")
-    setAuthor("")
-    setGenres([])
-    setGenre("")
+    try {
+      await createBook({ variables: { title, author, published, genres } })
+      setTitle("")
+      setPublished("")
+      setAuthor("")
+      setGenres([])
+      setGenre("")
+      setPage("books")
+    }
+    catch (error) {
+      setError(error)
+    }
   }
 
   const addGenre = () => {
     setGenres(genres.concat(genre))
     setGenre("")
+  }
+
+  if (!show) {
+    return null
   }
 
   return (
