@@ -1,8 +1,12 @@
 const { GraphQLError } = require("graphql")
 const jwt = require("jsonwebtoken")
+const { PubSub } = require("graphql-subscriptions")
+const pubsub = new PubSub()
+
 const Author = require("./models/author")
 const Book = require("./models/book")
 const User = require("./models/user")
+
 require("dotenv").config()
 
 const JWT_SECRET = process.env.JWT_SECRET
@@ -91,6 +95,8 @@ const resolvers = {
         throw new GraphQLError(error)
       }
 
+      pubsub.publish("BOOK_ADDED", { bookAdded: book })
+
       return book
     },
     editAuthor: async (root, args, context) => {
@@ -139,6 +145,11 @@ const resolvers = {
       }
 
       return { value: jwt.sign(user, JWT_SECRET) }
+    }
+  },
+  Subscription: {
+    bookAdded: {
+      subscribe: () => pubsub.asyncIterator("BOOK_ADDED")
     }
   }
 }

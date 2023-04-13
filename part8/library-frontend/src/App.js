@@ -1,11 +1,28 @@
 import { useEffect, useState } from "react"
-import { useApolloClient } from "@apollo/client"
+import { useApolloClient, useSubscription } from "@apollo/client"
 import Authors from "./components/Authors"
 import Books from "./components/Books"
 import NewBook from "./components/NewBook"
 import Recommendations from "./components/Recommendations"
 import LoginForm from "./components/LoginForm"
 import Notification from "./components/Notification"
+import { ALL_BOOKS, BOOK_ADDED } from "./queries"
+
+export const updateCache = (cache, query, bookAdded) => {
+  const uniqByName = (a) => {
+    let seen = new Set()
+    return a.filter((item) => {
+      let k = item.name
+      return seen.has(k) ? false : seen.add(k)
+    })
+  }
+
+  cache.updateQuery(query, ({ allBooks }) => {
+    return {
+      allBooks: uniqByName(allBooks.concat(bookAdded)),
+    }
+  })
+}
 
 const App = () => {
   const [notification, setNotification] = useState(null)
@@ -16,6 +33,14 @@ const App = () => {
   useEffect(() => {
     setToken(localStorage.getItem("library-user-token"))
   }, [])
+
+  useSubscription(BOOK_ADDED, {
+    onData: ({ data }) => {
+      const addedBook = data.data.bookAdded
+      setError("A new book has been added")
+      updateCache(client.cache, { query: ALL_BOOKS }, addedBook)
+    }
+  })
 
   const setError = (message) => {
     setNotification(message)

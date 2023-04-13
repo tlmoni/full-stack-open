@@ -5,6 +5,7 @@ import {
   ALL_BOOKS,
   ADD_BOOK
 } from "../queries"
+import { updateCache } from "../App"
 
 const NewBook = ({ show, setError, setPage }) => {
   const [title, setTitle] = useState("")
@@ -20,7 +21,10 @@ const NewBook = ({ show, setError, setPage }) => {
     ],
     onError: (error) => {
       setError(error.graphQLErrors[0].message)
-    }
+    },
+    update: (cache, response) => {
+      updateCache(cache, { query: ALL_BOOKS }, response.data.addBook)
+    },
   })
 
   const submit = async (event) => {
@@ -30,9 +34,9 @@ const NewBook = ({ show, setError, setPage }) => {
       setTitle("")
       setPublished("")
       setAuthor("")
-      setGenres([])
       setGenre("")
-      setPage("books")
+      setGenres([])
+      setPage("authors")
     }
     catch (error) {
       setError(error)
